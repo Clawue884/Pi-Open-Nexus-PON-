@@ -1,0 +1,24 @@
+import React, { useState } from 'react';
+
+const OracleValidation = () => {
+  const [validationStatus, setValidationStatus] = useState('');
+
+  const handleValidate = async () => {
+    const response = await fetch('/oracle/validate');
+    const data = await response.json();
+    setValidationStatus(data.isValid ? 'Data Validated!' : 'Data Invalid');
+  };
+
+  return (
+    <div>
+      <h2>Oracle Validation</h2>
+      <button onClick={handleValidate}>Validate Data</button>
+      {validationStatus && <p>{validationStatus}</p>}
+    </div>
+  );
+};
+
+export default OracleValidation;
+
+
+---
