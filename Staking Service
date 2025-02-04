@@ -1,0 +1,26 @@
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class StakingService {
+  private stakes = [];
+
+  stake(user: string, amount: number) {
+    this.stakes.push({ user, amount, timestamp: Date.now() });
+    return { status: 'staked', amount };
+  }
+
+  withdraw(user: string) {
+    const stake = this.stakes.find(s => s.user === user);
+    if (!stake) throw new Error('No staking found');
+
+    const duration = Date.now() - stake.timestamp;
+    const reward = (stake.amount * 10 * duration) / (365 * 24 * 60 * 60 * 1000);
+    const total = stake.amount + reward;
+
+    this.stakes = this.stakes.filter(s => s.user !== user);
+    return { status: 'withdrawn', amount: total };
+  }
+}
+
+
+---
