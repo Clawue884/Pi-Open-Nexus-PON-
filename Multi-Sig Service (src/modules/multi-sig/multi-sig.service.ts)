@@ -1,0 +1,47 @@
+import { Injectable } from '@nestjs/common';
+import { ethers } from 'ethers';
+
+@Injectable()
+export class MultiSigService {
+  generateMultiSigWallet(owners: string[], requiredSignatures: number) {
+    if (requiredSignatures > owners.length) {
+      throw new Error('Jumlah tanda tangan harus kurang atau sama dengan jumlah pemilik.');
+    }
+
+    return {
+      owners,
+      requiredSignatures,
+      transactions: [],
+    };
+  }
+
+  createMultiSigTransaction(wallet, txData) {
+    if (!wallet.owners.includes(txData.sender)) {
+      throw new Error('Pengirim bukan bagian dari pemilik dompet.');
+    }
+
+    return {
+      ...txData,
+      confirmations: [],
+    };
+  }
+
+  confirmTransaction(wallet, transaction, signer) {
+    if (!wallet.owners.includes(signer)) {
+      throw new Error('Signer bukan pemilik wallet.');
+    }
+
+    if (!transaction.confirmations.includes(signer)) {
+      transaction.confirmations.push(signer);
+    }
+
+    if (transaction.confirmations.length >= wallet.requiredSignatures) {
+      transaction.executed = true;
+    }
+
+    return transaction;
+  }
+}
+
+
+---
