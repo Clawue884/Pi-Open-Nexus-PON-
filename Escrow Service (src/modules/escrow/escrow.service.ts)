@@ -1,0 +1,27 @@
+import { Injectable } from '@nestjs/common';
+import { ethers } from 'ethers';
+
+@Injectable()
+export class EscrowService {
+  private escrows = [];
+
+  createEscrow(seller: string, buyer: string, amount: number) {
+    const escrow = {
+      id: this.escrows.length + 1,
+      seller,
+      buyer,
+      amount,
+      status: 'pending',
+    };
+    this.escrows.push(escrow);
+    return escrow;
+  }
+
+  releaseEscrow(escrowId: number, buyer: string) {
+    const escrow = this.escrows.find(e => e.id === escrowId);
+    if (!escrow || escrow.buyer !== buyer) throw new Error('Unauthorized');
+
+    escrow.status = 'released';
+    return escrow;
+  }
+}
