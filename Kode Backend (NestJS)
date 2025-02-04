@@ -1,0 +1,27 @@
+import { Injectable } from '@nestjs/common';
+import * as bip39 from 'bip39';
+import { HDNode, networks } from 'bitcoinjs-lib';
+import * as bip32 from 'bip32';
+import * as ethers from 'ethers';
+
+@Injectable()
+export class HDWalletService {
+  generateMnemonic(): string {
+    return bip39.generateMnemonic();
+  }
+
+  async getWalletFromMnemonic(mnemonic: string, index: number = 0) {
+    const seed = await bip39.mnemonicToSeed(mnemonic);
+    const root = bip32.fromSeed(seed, networks.bitcoin);
+    const child = root.derivePath(`m/44'/0'/0'/0/${index}`);
+    const keyPair = ethers.utils.HDNode.fromMnemonic(mnemonic).derivePath(`m/44'/60'/0'/0/${index}`);
+    
+    return {
+      privateKey: keyPair.privateKey,
+      address: keyPair.address,
+    };
+  }
+}
+
+
+---
