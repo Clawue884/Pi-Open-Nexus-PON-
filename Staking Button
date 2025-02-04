@@ -1,0 +1,27 @@
+import { useState } from 'react';
+
+const Staking = () => {
+  const [amount, setAmount] = useState(0);
+
+  const handleStake = async () => {
+    await fetch('/api/staking/stake', {
+      method: 'POST',
+      body: JSON.stringify({ amount }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+    alert('Staked successfully!');
+  };
+
+  return (
+    <div>
+      <h2>Stake Pi</h2>
+      <input type="number" onChange={(e) => setAmount(Number(e.target.value))} />
+      <button onClick={handleStake}>Stake</button>
+    </div>
+  );
+};
+
+export default Staking;
+
+
+---
