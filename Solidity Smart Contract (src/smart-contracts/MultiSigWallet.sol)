@@ -1,0 +1,73 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract MultiSigWallet {
+    address[] public owners;
+    uint public requiredSignatures;
+    mapping(uint => mapping(address => bool)) public confirmations;
+
+    struct Transaction {
+        address to;
+        uint value;
+        bytes data;
+        bool executed;
+    }
+
+    Transaction[] public transactions;
+
+    constructor(address[] memory _owners, uint _requiredSignatures) {
+        require(_owners.length > 0, "Pemilik harus ada.");
+        require(_requiredSignatures > 0 && _requiredSignatures <= _owners.length, "Jumlah tanda tangan salah.");
+
+        owners = _owners;
+        requiredSignatures = _requiredSignatures;
+    }
+
+    function submitTransaction(address _to, uint _value, bytes memory _data) public {
+        require(isOwner(msg.sender), "Bukan pemilik.");
+
+        transactions.push(Transaction({
+            to: _to,
+            value: _value,
+            data: _data,
+            executed: false
+        }));
+    }
+
+    function confirmTransaction(uint _txIndex) public {
+        require(isOwner(msg.sender), "Bukan pemilik.");
+        require(!confirmations[_txIndex][msg.sender], "Sudah dikonfirmasi.");
+
+        confirmations[_txIndex][msg.sender] = true;
+
+        if (getConfirmationCount(_txIndex) >= requiredSignatures) {
+            executeTransaction(_txIndex);
+        }
+    }
+
+    function executeTransaction(uint _txIndex) internal {
+        Transaction storage transaction = transactions[_txIndex];
+        require(!transaction.executed, "Transaksi sudah dieksekusi.");
+
+        transaction.executed = true;
+        (bool success, ) = transaction.to.call{value: transaction.value}(transaction.data);
+        require(success, "Gagal mengeksekusi transaksi.");
+    }
+
+    function getConfirmationCount(uint _txIndex) public view returns (uint count) {
+        for (uint i = 0; i < owners.length; i++) {
+            if (confirmations[_txIndex][owners[i]]) {
+                count += 1;
+            }
+        }
+    }
+
+    function isOwner(address account) internal view returns (bool) {
+        for (uint i = 0; i < owners.length; i++) {
+            if (owners[i] == account) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
