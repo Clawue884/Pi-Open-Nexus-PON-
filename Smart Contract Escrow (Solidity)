@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract Escrow {
+    address public buyer;
+    address public seller;
+    uint public amount;
+    bool public isReleased;
+
+    constructor(address _buyer, address _seller, uint _amount) {
+        buyer = _buyer;
+        seller = _seller;
+        amount = _amount;
+        isReleased = false;
+    }
+
+    function releaseFunds() public {
+        require(msg.sender == buyer, "Hanya pembeli yang dapat merilis dana.");
+        require(!isReleased, "Dana sudah dirilis.");
+        
+        isReleased = true;
+        payable(seller).transfer(amount);
+    }
+
+    function deposit() public payable {
+        require(msg.value == amount, "Jumlah tidak sesuai.");
+    }
+}
+
+
+---
