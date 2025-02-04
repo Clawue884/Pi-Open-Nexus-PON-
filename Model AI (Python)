@@ -1,0 +1,21 @@
+import tensorflow as tf
+from tensorflow import keras
+import numpy as np
+
+# Simple Neural Network Model for validation
+model = keras.Sequential([
+    keras.layers.Dense(128, activation='relu', input_shape=(10,)),  # Example input shape
+    keras.layers.Dense(64, activation='relu'),
+    keras.layers.Dense(1, activation='sigmoid')  # Binary output
+])
+
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+# Example: training the model with some mock data
+X_train = np.random.rand(1000, 10)  # 1000 samples, 10 features
+y_train = np.random.randint(0, 2, 1000)  # 1000 labels (0 or 1)
+
+model.fit(X_train, y_train, epochs=10)
+
+# Save the trained model
+model.save('ai/model.json')
