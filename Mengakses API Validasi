@@ -1,0 +1,29 @@
+import { Controller, Get } from '@nestjs/common';
+import { OracleService } from './oracle.service';
+
+@Controller('oracle')
+export class OracleController {
+  constructor(private readonly oracleService: OracleService) {}
+
+  @Get('validate')
+  async validateOracleData() {
+    const apiUrl = 'https://api.example.com/data';  // Replace with actual API URL
+    const result = await this.oracleService.getValidatedData(apiUrl);
+    const requestId = 'unique-request-id';  // Generate unique request ID
+    const isValid = result.isValid;
+
+    // Call smart contract to submit validation result
+    const contractAddress = '0xYourContractAddress';
+    const abi = [ /* Your ABI here */ ];
+
+    const web3 = new Web3('https://infura.io'); // Example web3 setup
+    const contract = new web3.eth.Contract(abi, contractAddress);
+
+    await contract.methods.submitData(requestId, isValid).send({ from: '0xYourAccount' });
+
+    return { status: 'Data submitted to smart contract', requestId, isValid };
+  }
+}
+
+
+---
